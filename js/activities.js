@@ -9,7 +9,7 @@ function parseTweets(runkeeper_tweets) {
 		return new Tweet(tweet.text, tweet.created_at);
 	});
 
-	updateActivityText(tweet_array);
+	updateActivityText();
 
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 	graphActivityAmount()
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
 	loadSavedRunkeeperTweets().then(parseTweets);
 });
 
-function updateActivityText(tweet_array)
+function updateActivityText()
 {
 	const activitiesToAmounts = getActivitiesAmounts();
 	const descendingKeys = getDescendingKeys(activitiesToAmounts);
