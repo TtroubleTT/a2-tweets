@@ -2,6 +2,29 @@ class Tweet {
 	private text:string;
 	time:Date;
 
+    private activies: string[] = [
+        "walk",
+        "swim",
+        "ski",
+        "bike",
+        "elliptical workout",
+        "row",
+        "activity",
+        "freestyle",
+        "hike",
+        "chair ride",
+        "skate",
+        "snowboard",
+        "run",
+    ];
+
+    private distances: string[] = [
+        "mi",
+        "miles",
+        "km",
+        "kilometres",
+    ];
+
 	constructor(tweet_text:string, tweet_time:string) {
         this.text = tweet_text;
 		this.time = new Date(tweet_time);//, "ddd MMM D HH:mm:ss Z YYYY"
@@ -77,16 +100,47 @@ class Tweet {
         if (this.source != 'completed_event') {
             return "unknown";
         }
+
+        let lowerCaseText = this.text.toLocaleLowerCase();
         //TODO: parse the activity type from the text of the tweet
-        return "";
+        for (let i = 0; i < this.activies.length; i++)
+        {
+            let wordToMatch = this.activies[i];
+            if (lowerCaseText.search(`\\b${wordToMatch}\\b`) !== -1)
+            {
+                return wordToMatch;
+            }
+        }
+
+        return "unknown";
     }
 
     get distance():number {
         if(this.source != 'completed_event') {
-            return 0;
+            return -1;
         }
+
+        let lowerCaseText = this.text.toLocaleLowerCase();
+
         //TODO: prase the distance from the text of the tweet
-        return 0;
+        for (let i = 0; i < this.distances.length; i++)
+        {
+            let targetWord = this.distances[i];
+            const regex = new RegExp(`([\\d.]+)\\s+${targetWord}\\b`);
+            const match = lowerCaseText.match(regex);
+            if (match)
+            {
+                let distance = parseFloat(match[1]);
+                if (targetWord === "km" || targetWord === "kilometres")
+                {
+                    distance = distance / 1.609;
+                }
+
+                return distance;
+            }
+        }
+
+        return -1;
     }
 
     getHTMLTableRow(rowNumber:number):string {
