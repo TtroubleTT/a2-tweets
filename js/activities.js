@@ -1,3 +1,6 @@
+let showingAggregated = false;
+let [modifiedTweets, mostTweetedActivities] = [];
+
 function parseTweets(runkeeper_tweets) {
 	//Do not proceed if no tweets loaded
 	if(runkeeper_tweets === undefined) {
@@ -12,10 +15,15 @@ function parseTweets(runkeeper_tweets) {
 	updateActivityText();
 
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
-	graphActivityAmount()
+	let mostTweeted = getTop3MostTweetedActivity();
+	[modifiedTweets, mostTweetedActivities] = getModifiedTweets(mostTweeted);
+	graphActivityAmount(modifiedTweets)
 
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
+	graphDistanceByDay(mostTweetedActivities);
+	document.getElementById("aggregate").addEventListener("click", onAggregateClick);
+	updateLastInfo();
 }
 
 //Wait for the DOM to load
@@ -95,7 +103,9 @@ function getModifiedTweets(mostTweeted)
 		mostTweetedActivities.push({
 			activityType: tweet.activityType,
 			distance: tweet.distance,
-			time: tweet.time,
+			time: tweet.time.toLocaleDateString("en-US", {
+				weekday: "short"
+			}),
 		});
 	}
 
@@ -115,11 +125,8 @@ function getTop3MostTweetedActivity()
 	return mostTweeted;
 }
 
-function graphActivityAmount()
+function graphActivityAmount(modifiedTweets)
 {
-	let mostTweeted = getTop3MostTweetedActivity();
-	const [modifiedTweets, mostTweetedActivities]= getModifiedTweets(mostTweeted);
-
 	activity_vis_spec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 		"description": "A graph of the number of Tweets containing each type of activity.",
@@ -142,4 +149,97 @@ function graphActivityAmount()
 		//TODO: Add mark and encoding
 	};
 	vegaEmbed('#activityVis', activity_vis_spec, {actions:false});
+}
+
+function graphDistanceByDay(mostTweetedActivities)
+{
+	let distance_vis_spec = {
+		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+		"description": "A graph of the the distance mentioned in the most tweeted activities by day of the week.",
+		"width": 300,
+		"height": 200,
+		"data": {
+			"values": mostTweetedActivities
+		},
+		"mark": "point",
+		"encoding": {
+			"x":{
+				"field": "time",
+				"type": "nominal",
+				"title": "time (day)",
+				"sort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+			},
+			"y":{
+				"field": "distance",
+				"type": "quantitative",
+				"title": "distance",
+			},
+			"color": {
+				"field": "activityType",
+				"type": "nominal",
+				"title": "activity type",
+			}
+		},
+		//TODO: Add mark and encoding
+	};
+	vegaEmbed('#distanceVis', distance_vis_spec, {actions:false});
+}
+
+function graphDistanceMeanByDay(mostTweetedActivities)
+{
+	let distance_vis_spec = {
+		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+		"description": "A graph of the the distance mentioned in the most tweeted activities by day of the week.",
+		"width": 300,
+		"height": 200,
+		"data": {
+			"values": mostTweetedActivities
+		},
+		"mark": "point",
+		"encoding": {
+			"x":{
+				"field": "time",
+				"type": "nominal",
+				"title": "time (day)",
+				"sort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+			},
+			"y":{
+				"field": "distance",
+				"type": "quantitative",
+				"title": "Mean of distance",
+				"aggregate": "mean",
+			},
+			"color": {
+				"field": "activityType",
+				"type": "nominal",
+				"title": "activity type",
+			}
+		},
+		//TODO: Add mark and encoding
+	};
+	vegaEmbed('#distanceVisAggregated', distance_vis_spec, {actions:false});
+}
+
+function onAggregateClick()
+{
+	if (showingAggregated)
+	{
+		graphDistanceByDay(mostTweetedActivities);
+		document.getElementById("distanceVisAggregated").innerHTML = "";
+		document.getElementById("aggregate").innerHTML = "Show means";
+		showingAggregated = false;
+		return;
+	}
+
+	document.getElementById("distanceVis").innerHTML = "";
+	graphDistanceMeanByDay(mostTweetedActivities);
+	document.getElementById("aggregate").innerHTML = "Show all activities";
+	showingAggregated = true;
+}
+
+function updateLastInfo()
+{
+	document.getElementById("longestActivityType").innerHTML = "bike";
+	document.getElementById("shortestActivityType").innerHTML = "walk";
+	document.getElementById("weekdayOrWeekendLonger").innerHTML = "the Weekend";
 }
