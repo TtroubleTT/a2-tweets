@@ -13,6 +13,8 @@ function parseTweets(runkeeper_tweets) {
 	//It works correctly, your task is to update the text of the other tags in the HTML file!
 	document.getElementById('numberTweets').innerText = tweet_array.length;
 	updateTweetTimes(tweet_array);
+	updateCategories(tweet_array);
+	updateUserWritten(tweet_array);
 }
 
 //Wait for the DOM to load
@@ -41,4 +43,93 @@ function updateTweetTimes(tweet_array)
 
 	document.getElementById("firstDate").innerText = earlyTweet.time.toLocaleDateString();
 	document.getElementById("lastDate").innerText = latestTweet.time.toLocaleDateString();
+}
+
+function updateCategories(tweet_array)
+{
+	let completedAmount = 0;
+	let liveAmount = 0;
+	let achievementAmount = 0;
+	let miscellaneousAmount = 0;
+
+	for (let i = 0; i < tweet_array.length; i++)
+	{
+		let tweet = tweet_array[i];
+		let source = tweet.source;
+		if (source === "live_event")
+		{
+			liveAmount++;
+			continue;
+		}
+
+		if (source === "achievement")
+		{
+			achievementAmount++;
+			continue;
+		}
+
+		if (source === "completed_event")
+		{
+			completedAmount++;
+			continue;
+		}
+
+		miscellaneousAmount++;
+	}
+
+	let totalTweets = tweet_array.length;
+	let completedPercentage = ((completedAmount / totalTweets) * 100).toFixed(2);
+	let livePercentage = ((liveAmount / totalTweets) * 100).toFixed(2);
+	let achievementPercentage = ((achievementAmount / totalTweets) * 100).toFixed(2);
+	let miscellaneousPercentage = ((miscellaneousAmount / totalTweets) * 100).toFixed(2);
+
+	updateAmount(document.getElementsByClassName("completedEvents"), completedAmount);
+	updateAmount(document.getElementsByClassName("liveEvents"), liveAmount);
+	updateAmount(document.getElementsByClassName("achievements"), achievementAmount);
+	updateAmount(document.getElementsByClassName("miscellaneous"), miscellaneousAmount);
+
+	updateAmount(document.getElementsByClassName("completedEventsPct"), completedPercentage + "%");
+	updateAmount(document.getElementsByClassName("liveEventsPct"), livePercentage + "%");
+	updateAmount(document.getElementsByClassName("achievementsPct"), achievementPercentage + "%");
+	updateAmount(document.getElementsByClassName("miscellaneousPct"), miscellaneousPercentage + "%");
+}
+
+function updateAmount(elements, amount)
+{
+	for (let i = 0; i < elements.length; i++)
+	{
+		elements[i].innerHTML = amount;
+	}
+}
+
+function updateUserWritten(tweet_array)
+{
+	let userWrittenAmount = 0;
+	let completedEvents = 0;
+	let temp = 0;
+
+	for (let i = 0; i < tweet_array.length; i++)
+	{
+		let tweet = tweet_array[i];
+
+		if (tweet.source !== "completed_event")
+		{
+			continue;
+		}
+
+		completedEvents++;
+		if (tweet.written)
+		{
+			userWrittenAmount++;
+			if (temp < 100)
+			{
+				temp++;
+				console.log(tweet.writtenText);
+			}
+		}
+	}
+
+	let percentage = ((userWrittenAmount / completedEvents) * 100).toFixed(2);
+	updateAmount(document.getElementsByClassName("written"), userWrittenAmount);
+	updateAmount(document.getElementsByClassName("writtenPct"), percentage + "%");
 }
