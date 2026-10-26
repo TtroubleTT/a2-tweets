@@ -106,7 +106,6 @@ function updateUserWritten(tweet_array)
 {
 	let userWrittenAmount = 0;
 	let completedEvents = 0;
-	let temp = 0;
 
 	for (let i = 0; i < tweet_array.length; i++)
 	{
@@ -121,11 +120,6 @@ function updateUserWritten(tweet_array)
 		if (tweet.written)
 		{
 			userWrittenAmount++;
-			if (temp < 100)
-			{
-				temp++;
-				console.log(tweet.writtenText);
-			}
 		}
 	}
 
