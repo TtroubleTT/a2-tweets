@@ -145,7 +145,14 @@ class Tweet {
 
     getHTMLTableRow(rowNumber:number):string {
         //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-        return "<tr></tr>";
+        let match = this.text.match(/https?:\/\/\S+/);
+        let updatedTweet = this.text;
+        if (match)
+        {
+            updatedTweet = updatedTweet.replace(/https?:\/\/\S+/, `<a href="${match[0]}">${match[0]}</a>`)
+        }
+
+        return `<tr><td>${rowNumber}</td><td>${this.activityType}</td><td>${updatedTweet}</td></tr>`;
     }
 
     getTrimmedText():string {

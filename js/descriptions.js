@@ -62,7 +62,7 @@ function makeTable(event)
 	for (let i = 0; i < filteredTweets.length; i++)
 	{
 		let tweet = filteredTweets[i];
-		rows += `<tr><td>${i + 1}</td><td>${tweet.activityType}</td><td>${tweet.text}</td></tr>`;
+		rows += tweet.getHTMLTableRow(i + 1);
 	}
 
 	document.getElementById("tweetTable").innerHTML = rows;
